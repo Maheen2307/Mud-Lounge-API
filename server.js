@@ -53,7 +53,7 @@ app.post('/api/bookings', (req, res) => {
         contactNo,
         sessionCategory,
         preferredDate,
-        timeSlot,
+ timeSlot,
         createdAt: new Date().toISOString()
     };
 
@@ -71,3 +71,6 @@ app.post('/api/bookings', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 });
+
+// Export app for Vercel serverless functions
+module.exports = app;
