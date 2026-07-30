@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const db = require('./config/db'); // Import database connection
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -8,25 +10,31 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-// In-memory storage for studio bookings
-let bookings = [];
-
 // ==========================================
-// 1. GET Endpoint: Retrieve all bookings
+// 1. GET Endpoint: Retrieve all bookings from PostgreSQL
 // ==========================================
-app.get('/api/bookings', (req, res) => {
-    res.status(200).json({
-        success: true,
-        count: bookings.length,
-        data: bookings
-    });
+app.get('/api/bookings', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM bookings ORDER BY created_at DESC;');
+        res.status(200).json({
+            success: true,
+            count: result.rowCount,
+            data: result.rows
+        });
+    } catch (error) {
+        console.error("Database Error:", error.message);
+        res.status(500).json({
+            success: false,
+            error: "Failed to retrieve bookings from database."
+        });
+    }
 });
 
 // ==========================================
-// 2. POST Endpoint: Handle & Validate Booking
+// 2. POST Endpoint: Handle, Validate & Save Booking
 // ==========================================
-app.post('/api/bookings', (req, res) => {
-  console.log("New Booking Received:", req.body);
+app.post('/api/bookings', async (req, res) => {
+    console.log("New Booking Received:", req.body);
     const { fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot } = req.body;
 
     // Strict Server-Side Data Validation
@@ -45,26 +53,29 @@ app.post('/api/bookings', (req, res) => {
         });
     }
 
-    // Process and store the booking data
-    const newBooking = {
-        id: Date.now().toString(),
-        fullName,
-        emailAddress,
-        contactNo,
-        sessionCategory,
-        preferredDate,
- timeSlot,
-        createdAt: new Date().toISOString()
-    };
+    try {
+        // Insert into PostgreSQL using Parameterized Queries ($1 - $6 prevents SQL injection)
+        const query = `
+            INSERT INTO bookings (full_name, email_address, contact_no, session_category, preferred_date, time_slot)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *;
+        `;
+        const values = [fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot];
+        const result = await db.query(query, values);
 
-    bookings.push(newBooking);
-
-    // Success Response
-    return res.status(201).json({
-        success: true,
-        message: "Your pottery wheel session has been successfully reserved!",
-        data: newBooking
-    });
+        // Success Response
+        return res.status(201).json({
+            success: true,
+            message: "Your pottery wheel session has been successfully reserved!",
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error("Database Insert Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            error: "Database error occurred while processing your booking."
+        });
+    }
 });
 
 // Start Server
