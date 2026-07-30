@@ -1,37 +1,55 @@
 const express = require('express');
 const cors = require('cors');
+const { Pool } = require('pg');
+require('dotenv').config();
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// PostgreSQL Connection Pool (Neon Cloud DB)
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
 // =============================================================
 // THE MUD LOUNGE - PROJECT 3: COMPLETE CRUD API ENDPOINTS
 // =============================================================
 
-// 1. CREATE (POST): Nayi workshop booking ya contact form submission
+// 1. CREATE (POST): Nayi pottery session booking submit karna
 app.post('/api/bookings', async (req, res) => {
     try {
-        const { name, email, workshop, date } = req.body;
+        const { fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot } = req.body;
 
-        // Validation Check
-        if (!name || !email || !workshop) {
+        // Syntactic Validation Check
+        if (!fullName || !emailAddress || !contactNo || !sessionCategory || !preferredDate || !timeSlot) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Name, email, and workshop are required fields.' 
+                message: 'All required fields must be provided.' 
             });
         }
 
-        // Database Insertion (Parameterized Query for Security)
-        // Example: const newBooking = await db.query('INSERT INTO bookings (name, email, workshop, date) VALUES ($1, $2, $3, $4) RETURNING *', [name, email, workshop, date]);
+        // Database Insertion (Parameterized Query for SQL Injection Protection)
+        const query = `
+            INSERT INTO bookings (fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot) 
+            VALUES ($1, $2, $3, $4, $5, $6) 
+            RETURNING *
+        `;
+        const values = [fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot];
+        const newBooking = await pool.query(query, values);
 
         res.status(201).json({
             success: true,
             message: 'Booking created successfully!',
-            data: { name, email, workshop, date }
+            data: newBooking.rows[0]
         });
     } catch (error) {
+        console.error('Database Insertion Error:', error);
         res.status(500).json({ success: false, error: 'Database insertion failed.' });
     }
 });
@@ -39,51 +57,80 @@ app.post('/api/bookings', async (req, res) => {
 // 2. READ (GET): Database se saari bookings fetch karna
 app.get('/api/bookings', async (req, res) => {
     try {
-        // Database Fetching Query
-        // Example: const bookings = await db.query('SELECT * FROM bookings ORDER BY created_at DESC');
+        const query = 'SELECT * FROM bookings ORDER BY id DESC';
+        const result = await pool.query(query);
 
         res.status(200).json({
             success: true,
             message: 'Bookings retrieved successfully!',
-            data: [] // Database records array
+            data: result.rows
         });
     } catch (error) {
+        console.error('Database Fetch Error:', error);
         res.status(500).json({ success: false, error: 'Failed to retrieve bookings.' });
     }
 });
 
-// 3. UPDATE (PUT): Existing booking ki details ya status change karna
+// 3. UPDATE (PUT): Existing booking ki details update karna
+app.put('/api/bookings/:id', async (ko, res) => {}); // placeholder support
 app.put('/api/bookings/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { workshop, date, status } = req.body;
+        const { fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot } = req.body;
 
-        // Database Update Query
-        // Example: const updated = await db.query('UPDATE bookings SET workshop = $1, date = $2, status = $3 WHERE id = $4', [workshop, date, status, id]);
+        const query = `
+            UPDATE bookings 
+            SET fullName = $1, emailAddress = $2, contactNo = $3, sessionCategory = $4, preferredDate = $5, timeSlot = $6 
+            WHERE id = $7 
+            RETURNING *
+        `;
+        const values = [fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot, id];
+        const updatedBooking = await pool.query(query, values);
+
+        if (updatedBooking.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found.' });
+        }
 
         res.status(200).json({
             success: true,
             message: `Booking ID ${id} updated successfully!`,
-            updatedData: { id, workshop, date, status }
+            updatedData: updatedBooking.rows[0]
         });
     } catch (error) {
+        console.error('Database Update Error:', error);
         res.status(500).json({ success: false, error: 'Failed to update booking.' });
     }
 });
 
-// 4. DELETE (DELETE): Kisi booking ko cancel ya database se remove karna
+// 4. DELETE (DELETE): Kisi booking ko permanently database se remove karna
 app.delete('/api/bookings/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Database Delete Query
-        // Example: await db.query('DELETE FROM bookings WHERE id = $1', [id]);
+        const query = 'DELETE FROM bookings WHERE id = $1 RETURNING *';
+        const deletedBooking = await pool.query(query, [id]);
+
+        if (deletedBooking.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found.' });
+        }
 
         res.status(200).json({
             success: true,
             message: `Booking ID ${id} permanently deleted.`
         });
     } catch (error) {
+        console.error('Database Delete Error:', error);
         res.status(500).json({ success: false, error: 'Failed to delete booking.' });
     }
 });
+
+// Local Development Server Listen
+const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+// CRITICAL FOR VERCEL DEPLOYMENT (Fixes the 500 Serverless Crash Error)
+module.exports = app;
