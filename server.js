@@ -34,9 +34,9 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
 
-        // Database Insertion (Parameterized Query for SQL Injection Protection)
+        // Database Insertion (Using lowercase column names to match Postgres defaults)
         const query = `
-            INSERT INTO bookings (fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot) 
+            INSERT INTO bookings (fullname, emailaddress, contactno, sessioncategory, preferreddate, timeslot) 
             VALUES ($1, $2, $3, $4, $5, $6) 
             RETURNING *
         `;
@@ -72,7 +72,6 @@ app.get('/api/bookings', async (req, res) => {
 });
 
 // 3. UPDATE (PUT): Existing booking ki details update karna
-app.put('/api/bookings/:id', async (ko, res) => {}); // placeholder support
 app.put('/api/bookings/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -80,7 +79,7 @@ app.put('/api/bookings/:id', async (req, res) => {
 
         const query = `
             UPDATE bookings 
-            SET fullName = $1, emailAddress = $2, contactNo = $3, sessionCategory = $4, preferredDate = $5, timeSlot = $6 
+            SET fullname = $1, emailaddress = $2, contactno = $3, sessioncategory = $4, preferreddate = $5, timeslot = $6 
             WHERE id = $7 
             RETURNING *
         `;
