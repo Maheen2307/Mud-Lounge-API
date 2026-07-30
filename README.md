@@ -52,3 +52,22 @@ A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to hand
 git clone [https://github.com/Maheen2307/Mud-Lounge-API.git](https://github.com/Maheen2307/Mud-Lounge-API.git)
 cd Mud-Lounge-API
 npm install
+```
+
+### 2. Environment Variables
+Create a `.env` file in the root directory and add your PostgreSQL connection string:
+```env
+PORT=5000
+DATABASE_URL=postgresql://your_user:your_password@your_neon_host/neondb?sslmode=require
+```
+
+### 3. Start the Server
+```bash
+node server.js
+```
+> The backend server will run on `http://localhost:5000`
+
+---
+
+## 📄 License
+This project is licensed under the **MIT License**.
