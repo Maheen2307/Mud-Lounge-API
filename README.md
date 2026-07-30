@@ -20,8 +20,6 @@ A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to hand
   - **Syntactic Validation**: Verifies that all required fields are present (`fullName`, `emailAddress`, `contactNo`, `sessionCategory`, `preferredDate`, `timeSlot`).
   - **Semantic Validation**: Verifies valid email address format.
   - **Status Codes**: Returns standard HTTP response codes (`201 Created` on success, `400 Bad Request` on validation failure).
-- **PUT `/api/bookings/:id`**: Updates an existing booking's details using its unique ID (`200 OK`).
-- **DELETE `/api/bookings/:id`**: Permanently removes a specific booking from the database (`200 OK`).
 
 ---
 
@@ -40,8 +38,6 @@ A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to hand
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/api/bookings` | Retrieve all studio bookings from database | `200 OK` | `500 Internal Error` |
 | `POST` | `/api/bookings` | Submit a new booking reservation to database | `201 Created` | `400 Bad Request` |
-| `PUT` | `/api/bookings/:id` | Update existing booking details by ID | `200 OK` | `400 / 500 Error` |
-| `DELETE` | `/api/bookings/:id` | Permanently delete a booking by ID | `200 OK` | `500 Internal Error` |
 
 ---
 
@@ -49,7 +45,7 @@ A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to hand
 
 ### 1. Clone & Install
 ```bash
-git clone [https://github.com/Maheen2307/Mud-Lounge-API.git](https://github.com/Maheen2307/Mud-Lounge-API.git)
+git clone https://github.com/Maheen2307/Mud-Lounge-API.git
 cd Mud-Lounge-API
 npm install
 ```
