@@ -5,7 +5,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to handle pottery studio session reservations for **The Mud Lounge**. Developed as part of the DecodeLabs Full-Stack Internship.
+> A responsive and modern user interface built with HTML, CSS, and JavaScript for The Mud Lounge pottery studio booking platform, featuring real-time form validation, dynamic date checking, and seamless REST API integration. Developed as part of the DecodeLabs Full-Stack Internship.
 
 🌐 **Live API Endpoint:** [https://mud-lounge-api.vercel.app/api/bookings](https://mud-lounge-api.vercel.app/api/bookings)  
 🎨 **Frontend Repository:** [Mud-Lounge-UI](https://github.com/Maheen2307/Mud-Lounge-UI)  
