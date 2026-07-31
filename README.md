@@ -8,6 +8,7 @@
 A robust RESTful Backend API for The Mud Lounge featuring PostgreSQL database integration, duplicate booking prevention logic, secure SQL query handling, and strict server-side validation. Developed as part of the DecodeLabs Full-Stack Internship.
 
 🌐 **Live API Endpoint:** [https://mud-lounge-api.vercel.app/api/bookings](https://mud-lounge-api.vercel.app/api/bookings)
+
 🎨 **Frontend Repository:** [Mud-Lounge-UI](https://github.com/Maheen2307/Mud-Lounge-UI)
 
 ---
