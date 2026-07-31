@@ -54,14 +54,28 @@ app.post('/api/bookings', async (req, res) => {
     }
 
     try {
-        // Insert into PostgreSQL using Parameterized Queries ($1 - $6 prevents SQL injection)
-        const query = `
+        // 1. Explicit Duplicate Check Query
+        const duplicateCheckQuery = `
+            SELECT * FROM bookings 
+            WHERE email_address = $1 AND session_category = $2 AND preferred_date = $3 AND time_slot = $4;
+        `;
+        const existingBooking = await db.query(duplicateCheckQuery, [emailAddress, sessionCategory, preferredDate, timeSlot]);
+
+        if (existingBooking.rowCount > 0) {
+            return res.status(409).json({
+                success: false,
+                error: "You have already reserved a spot for this session, date, and time slot!"
+            });
+        }
+
+        // 2. Insert into PostgreSQL
+        const insertQuery = `
             INSERT INTO bookings (full_name, email_address, contact_no, session_category, preferred_date, time_slot)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
         const values = [fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot];
-        const result = await db.query(query, values);
+        const result = await db.query(insertQuery, values);
 
         // Success Response
         return res.status(201).json({
@@ -70,18 +84,17 @@ app.post('/api/bookings', async (req, res) => {
             data: result.rows[0]
         });
     } catch (error) {
-        console.error("Database Insert Error:", error.message);
+        console.error("Database Insert Error:", error);
+
+        // Return exact database error message for debugging
         return res.status(500).json({
             success: false,
-            error: "Database error occurred while processing your booking."
+            error: `Database error: ${error.message}`
         });
     }
 });
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Backend server is running on http://localhost:${PORT}`);
+    console.log(`Live Server running smoothly on http://localhost:${PORT}`);
 });
-
-// Export app for Vercel serverless functions
-module.exports = app;
