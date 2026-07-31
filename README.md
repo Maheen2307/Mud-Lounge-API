@@ -5,10 +5,10 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to handle pottery studio session reservations for The Mud Lounge. Developed as part of the DecodeLabs Full-Stack Internship.
+A robust RESTful Backend API for The Mud Lounge featuring PostgreSQL database integration, duplicate booking prevention logic, secure SQL query handling, and strict server-side validation. Developed as part of the DecodeLabs Full-Stack Internship.
 
-🌐 **Live API Endpoint:** [https://mud-lounge-api.vercel.app/api/bookings](https://mud-lounge-api.vercel.app/api/bookings)  
-🎨 **Frontend Repository:** [Mud-Lounge-UI](https://github.com/Maheen2307/Mud-Lounge-UI)  
+🌐 **Live API Endpoint:** [https://mud-lounge-api.vercel.app/api/bookings](https://mud-lounge-api.vercel.app/api/bookings)
+🎨 **Frontend Repository:** [Mud-Lounge-UI](https://github.com/Maheen2307/Mud-Lounge-UI)
 
 ---
 
@@ -45,7 +45,7 @@ A robust RESTful Backend API built with Node.js, Express, and PostgreSQL to hand
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/Maheen2307/Mud-Lounge-API.git
+git clone [https://github.com/Maheen2307/Mud-Lounge-API.git](https://github.com/Maheen2307/Mud-Lounge-API.git)
 cd Mud-Lounge-API
 npm install
 ```
