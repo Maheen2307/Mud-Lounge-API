@@ -94,6 +94,84 @@ app.post('/api/bookings', async (req, res) => {
     }
 });
 
+// ==========================================
+// NOTE: UPDATE and DELETE operations are fully functional and prepared for future Admin Dashboard integration.
+// ==========================================
+
+// ==========================================
+// 3. PUT Endpoint: Update an existing booking
+// ==========================================
+app.put('/api/bookings/:id', async (req, res) => {
+    const { id } = req.params;
+    const { fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot } = req.body;
+
+    try {
+        const updateQuery = `
+            UPDATE bookings 
+            SET full_name = COALESCE($1, full_name), 
+                email_address = COALESCE($2, email_address), 
+                contact_no = COALESCE($3, contact_no), 
+                session_category = COALESCE($4, session_category), 
+                preferred_date = COALESCE($5, preferred_date), 
+                time_slot = COALESCE($6, time_slot)
+            WHERE id = $7
+            RETURNING *;
+        `;
+        const values = [fullName, emailAddress, contactNo, sessionCategory, preferredDate, timeSlot, id];
+        const result = await db.query(updateQuery, values);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Booking not found with the given ID."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Booking successfully updated!",
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error("Database Update Error:", error);
+        return res.status(500).json({
+            success: false,
+            error: `Database error: ${error.message}`
+        });
+    }
+});
+
+// ==========================================
+// 4. DELETE Endpoint: Remove a booking
+// ==========================================
+app.delete('/api/bookings/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deleteQuery = 'DELETE FROM bookings WHERE id = $1 RETURNING *;';
+        const result = await db.query(deleteQuery, [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Booking not found with the given ID."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Booking successfully deleted!",
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error("Database Delete Error:", error);
+        return res.status(500).json({
+            success: false,
+            error: `Database error: ${error.message}`
+        });
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Live Server running smoothly on http://localhost:${PORT}`);
