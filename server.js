@@ -54,17 +54,17 @@ app.post('/api/bookings', async (req, res) => {
     }
 
     try {
-        // 1. Explicit Duplicate Check Query
+        // 1. Updated Duplicate Check Query: Restricts user to ONE booking per day
         const duplicateCheckQuery = `
             SELECT * FROM bookings 
-            WHERE email_address = $1 AND session_category = $2 AND preferred_date = $3 AND time_slot = $4;
+            WHERE email_address = $1 AND preferred_date = $2;
         `;
-        const existingBooking = await db.query(duplicateCheckQuery, [emailAddress, sessionCategory, preferredDate, timeSlot]);
+        const existingBooking = await db.query(duplicateCheckQuery, [emailAddress, preferredDate]);
 
         if (existingBooking.rowCount > 0) {
             return res.status(409).json({
                 success: false,
-                error: "You have already reserved a spot for this session, date, and time slot!"
+                error: "You already have a booking scheduled for this date. Only one booking per day is allowed!"
             });
         }
 
