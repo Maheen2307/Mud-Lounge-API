@@ -54,7 +54,7 @@ app.post('/api/bookings', async (req, res) => {
     }
 
     try {
-        // 1. Updated Duplicate Check Query: Restricts user to ONE booking per day
+        // 1. Duplicate Check: Restricts user to ONE booking per day
         const duplicateCheckQuery = `
             SELECT * FROM bookings 
             WHERE email_address = $1 AND preferred_date = $2;
@@ -68,7 +68,23 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
 
-        // 2. Insert into PostgreSQL
+        // 2. Slot Capacity Check: Restricts maximum bookings per time slot (e.g., max 5 seats)
+        const MAX_SLOT_CAPACITY = 5;
+        const capacityCheckQuery = `
+            SELECT COUNT(*) FROM bookings 
+            WHERE preferred_date = $1 AND time_slot = $2;
+        `;
+        const slotCountResult = await db.query(capacityCheckQuery, [preferredDate, timeSlot]);
+        const currentBookingsCount = parseInt(slotCountResult.rows[0].count, 10);
+
+        if (currentBookingsCount >= MAX_SLOT_CAPACITY) {
+            return res.status(409).json({
+                success: false,
+                error: "This time slot is fully booked for the selected date. Please choose another slot!"
+            });
+        }
+
+        // 3. Insert into PostgreSQL
         const insertQuery = `
             INSERT INTO bookings (full_name, email_address, contact_no, session_category, preferred_date, time_slot)
             VALUES ($1, $2, $3, $4, $5, $6)
